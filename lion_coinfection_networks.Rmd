@@ -9,6 +9,9 @@ output: html_document
 ###########################################################
 # read in HB's data and packages and scripts code
 ###########################################################
+
+# TAKE OUT OTHER, BABESIA AND THEILERIABABESIA
+
 setwd("~/GitHub/lion-co-infection-networks")
 alldata<-read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/COINCLIQ.csv")
 dataneg<-alldata[alldata$FIV=="Negative",]
@@ -231,7 +234,7 @@ All network and node statistics were calculated with igraph (for monopartite net
 
 * Number of nodes: the number of parasites observed   
 * Mean Degree (Weighted): the average number of shared hosts per pathogen.  
-* Diameter: The maximum number of steps in the set of shortest paths between all parasite pairs.  This is a measure of connectedness- if you are one parasite, how quickly can you get to all the others) .
+* Diameter: The maximum number of steps in the set of shortest paths between all parasite pairs.  This is a measure of connectedness- if you are one parasite, how quickly can you get to all the parasites.
 * Transitivity: The ratio of the number of triangles and the number of connected triples in the graph.  Transitivity ranges from 0 to 1, with higher values indicating more connected subgraphs. It is a measure of clustering (high transitivity values mean you have clusters of pathogens that co-occur togeter- this will be interesting to see which ones are which!) 
 * Weighted Assortivity: The correlation between a parasites degree and the degree of the parasites connected to it.  Assortivity ranges from -1 to 1, with positive values indicating that nodes with high or low numbers of hosts interact mostly with nodes with similar degree values.  I interpret negative assortivity values as generalists pathogens are found with specialists.
 
@@ -239,17 +242,30 @@ All network and node statistics were calculated with igraph (for monopartite net
 parasitenet
 ```
 
+### Network statistics pt 2: Lion network
+For the lion network, we define nodes as lions and edges as sharing the same pathogen/parasite. Edges are weighted by the number of shared parasites. The same definitions apply: 
 
-Network properties: For the lion network, we define nodes as lions and edges as sharing the same pathogen/parasite. Edges are weighted by the number of shared parasites. 
+* Number of nodes: the number of lions observed.  By comparing FIV+ and FIV- networks we can evaluate if the number of lions with FIV is greater than the number of lions without FIV. 
+* Mean Degree (Weighted): the average number of pathogens per host.  FIV negative lions share fewer parasites/pathogens with other lions than FIV positive hosts.  This gets more exciting when you compare their distributions!  
+* Diameter: The maximum number of steps in the set of shortest paths between all lion pairs.  This is a measure of connectedness- if you are one lion, how quickly can you get to all the other lions.
+* Transitivity: The ratio of the number of triangles and the number of connected triples in the graph.  Transitivity ranges from 0 to 1, with higher values indicating more connected subgraphs. This measure shows that both FIV+ and FIV- networks are consistently really highly connected, so just reflects the fact that co-infections are really common. 
+* Weighted Assortivity: The correlation between a parasites degree and the degree of the parasites connected to it.  Assortivity ranges from -1 to 1, with positive values indicating that nodes with high or low numbers of hosts interact mostly with nodes with similar degree values.  Here FIV negative lions with high numbers of parasites/pathogens interact mostly wiht lions with few numbers of pathogens.
+
 ```{r}
 lionnet
 ```
-Number of nodes: the number of lions with FIV is greater than the number of lions without FIV (matching prevlaence graph)   
-Mean degree: FIV negative lions share fewer parasites/pathogens with other lions than FIV positive hosts.    
-Transitivity: consistently really highly connected regardless of FIV+ or negative.  
-Assortivity: FIV negative lions with high numbers of parasites/pathogens interact mostly wiht lions with few numbers of pathogens.  
 
+### Parasite network and lion network node statistics
+Node statistics are properties of each node.  For example, node statistics from the lion network tell you about how well connected or not each lion is based on its shared pathogens.  Node statistics are great because they can be regressed againsed age, sex, condition. I calcuated the following monopartite statistics and provide definitions based on the lion network: 
 
+* Weighted Degree: The number of lions connected to the focal lion by sharing a parasite.  If lions share 5 parasites, this value is 5. 
+* Unwieghted Degree: The number of lions connected to the focal lion (unweighted)
+* Betweenness: The number of shortest paths between any two lions that go through the focal lion.  This is measure of how central the lion is in the network. 
+* Closeness: The number of steps required to reach every other lion.  This is another measure of centrality. 
+* Transitivity: For the focal lion, this is the ratio of the triangles connected to the vertex and the triples centered on the vertex.  I find this confusing and prefer the global measure. 
+* Average nearest neighbor degree: The average number of lions connected to the immediate neighbors of the focal lion. 
+
+### Network statistics pt 3: Bipartite network
 
 ## Visualization
 Virus nodes are green, gut parasite nodes are salmon, blue nodes are blood borne pathogens

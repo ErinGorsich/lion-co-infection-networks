@@ -6,7 +6,7 @@
   # OUTPUT: 
   # 2 csv files: netstats_filename.csv; nodestats_filename.csv
   #####################################
-  
+	require("bipartite")  
 #  net.stats= data.frame()
 #  node.stats=data.frame(matrix(NA, nrow= length(c(unique(edgedata$lion), unique(edgedata$parasite))), 
 #                               ncol=7, dimnames=list(NULL, 
