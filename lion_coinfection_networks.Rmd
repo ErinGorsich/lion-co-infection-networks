@@ -9,12 +9,13 @@ output: html_document
 ###########################################################
 # read in HB's data and packages and scripts code
 ###########################################################
-setwd("~/Documents/postdoc_buffology/HB-lion_coinfection_network")
-alldata<-read.csv("COINCLIQ.csv")
+setwd("~/GitHub/lion-co-infection-networks")
+alldata<-read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/COINCLIQ.csv")
 dataneg<-alldata[alldata$FIV=="Negative",]
 datapos<-alldata[alldata$FIV=="Positive",]
 plotdata<-alldata[,c(11:35)]
 library(lattice)  
+library(bipartite)
 library(igraph)  # tried bigraph but not avaliable
 library(gplots)
 library(HiveR)
@@ -69,7 +70,9 @@ barplot2(height=c(virus$prev[order(virus$prev, decreasing=FALSE)],
 ```
 
 
-Plot of prevalence in FIV+ and FIV- lions shows a shift in pathogen community (ordering consistent with above)
+Plot of prevalence in FIV+ and FIV- lions.
+Visually, we can see shift in pathogen community largely driven by changes in intestinal parasites (ordering consistent with above).
+
 ```{r, descriptive_stats_comparison, echo=FALSE}
 newdf2<-newdf[-1,]
 newdf2$prevneg<-NA;  newdf2$prevpos<-NA
@@ -200,17 +203,17 @@ FIVpos_binet<- make_bipartite_matrix(datapos)
 
 # Summarize parasite networks
 ##################################################
-pall<- read.csv("net_stats_allparasitenetwork.csv")
-pneg<- read.csv("net_stats_FIVnegparasitenetwork.csv")
-ppos<- read.csv("net_stats_FIVposparasitenetwork.csv")
+pall<- read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/net_stats_allparasitenetwork.csv")
+pneg<- read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/net_stats_FIVnegparasitenetwork.csv")
+ppos<- read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/net_stats_FIVposparasitenetwork.csv")
 parasitenet<-rbind(pall[c(-1,-6, -8)], pneg[c(-1,-6, -8)], ppos[c(-1,-6, -8)])
 rownames(parasitenet)<-c("Overall_Network", "FIV_negative", "FIV_positive")
 
 # Summarize lion networks
 ##################################################
-lall<-read.csv("net_stats_alllionnetwork.csv")
-lneg<-read.csv("net_stats_FIVneglionnetwork.csv")
-lpos<-read.csv("net_stats_FIVposlionnetwork.csv")
+lall<-read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/net_stats_alllionnetwork.csv")
+lneg<-read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/net_stats_FIVneglionnetwork.csv")
+lpos<-read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/net_stats_FIVposlionnetwork.csv")
 lionnet<-rbind(lall[c(-1,-6, -8)], lneg[c(-1,-6, -8)], lpos[c(-1,-6, -8)])
 rownames(lionnet)<-c("Overall_Network", "FIV_negative", "FIV_positive")
 # Summarize bipartite networks
@@ -219,17 +222,23 @@ rownames(lionnet)<-c("Overall_Network", "FIV_negative", "FIV_positive")
 ```
 
 
-##Network statistics
-For the parasite network, we define nodes as parasite/pathogen species and edges as sharing the same host. Edges are weighted by the number of shared hosts. 
-All network and node statistics were calculated with igraph
+## Network statistics
+Below I consider three abstractions of the host-parastie community.  A "parasite network", a "host network", and a bipartite network.  Likely I will use the later, but they may all be useful abstractions. 
+
+### Network statistics pt 1: Parasite network
+For the parasite network, we define nodes as parasite/pathogen species.  An edge connects two nodes if the pathogens share the same host. Edges are weighted by the number of shared hosts. 
+All network and node statistics were calculated with igraph (for monopartite networks).  In this context, we can interpret the following network statistics: 
+
+* Number of nodes: the number of parasites observed   
+* Mean Degree (Weighted): the average number of shared hosts per pathogen.  
+* Diameter: The maximum number of steps in the set of shortest paths between all parasite pairs.  This is a measure of connectedness- if you are one parasite, how quickly can you get to all the others) .
+* Transitivity: The ratio of the number of triangles and the number of connected triples in the graph.  Transitivity ranges from 0 to 1, with higher values indicating more connected subgraphs. It is a measure of clustering (high transitivity values mean you have clusters of pathogens that co-occur togeter- this will be interesting to see which ones are which!) 
+* Weighted Assortivity: The correlation between a parasites degree and the degree of the parasites connected to it.  Assortivity ranges from -1 to 1, with positive values indicating that nodes with high or low numbers of hosts interact mostly with nodes with similar degree values.  I interpret negative assortivity values as generalists pathogens are found with specialists.
+
 ```{r}
 parasitenet
 ```
-Number of nodes: the number of parasites observed  
-Mean degree: The average number of shared hosts per pathogen.   
-*Diameter: The maximum number of steps in the set of shortest paths between all parasite pairs. (STILL NEED TO SORT OUT!)*   
-Transitivity: The ratio of the number of triangles and the number of connected triples in the graph.  Transitivity ranges from 0 to 1, with higher values indicating more connected subgraphs. (High transitivity values mean you have clusters that co-occur togeter- this will be interesting to see which ones are which!!!!!!!!!!!)  
-Assortivity: The correlation between a parasites degree and the degree of the parasites connected to it.  Assortivity ranges from -1 to 1, with positive values indicating that nodes with high or low numbers of hosts interact mostly with nodes with similar degree values.  (I interpret negative assortivity values as generalists pathogens are found with specialists)  
+
 
 Network properties: For the lion network, we define nodes as lions and edges as sharing the same pathogen/parasite. Edges are weighted by the number of shared parasites. 
 ```{r}
@@ -260,7 +269,8 @@ make_bipart_hive_plot(allb, datatype="all", demogdata=alldata, save_nodedf=FALSE
 # Visualize FIV+ bipartite network
 ##################################################
 ##################################################
-make_bipart_hive_plot(FIVpos_binet, datatype="FIV", demogdata=alldata, save_nodedf=FALSE, name="nosave")
+#make_bipart_hive_plot(FIVpos_binet, datatype="FIV", demogdata=alldata, 
+    #save_nodedf=FALSE, name="nosave")
 
 ```
 
