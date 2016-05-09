@@ -6,7 +6,7 @@
   # OUTPUT: 
   # 2 csv files: netstats_filename.csv; nodestats_filename.csv
   #####################################
-	require("bipartite")  
+#	require("bipartite")  
 #  net.stats= data.frame()
 #  node.stats=data.frame(matrix(NA, nrow= length(c(unique(edgedata$lion), unique(edgedata$parasite))), 
 #                               ncol=7, dimnames=list(NULL, 
@@ -91,49 +91,55 @@
     
 
 calculate_net_and_node_stats<-function(matdata, name){
-  #####################################
-  # INPUT: 
-  # matdata= matrix, symmetric
-  # name= filename for saving; .csv is appended below
-  # OUTPUT: 
-  # 2 csv files: netstats_filename.csv; nodestats_filename.csv
-  #####################################
+    #####################################
+    # INPUT: 
+    # matdata= matrix, symmetric
+    # name= filename for saving; .csv is appended below
+    # OUTPUT: 
+    # 2 csv files: netstats_filename.csv; nodestats_filename.csv
+    #####################################
   
-  net.stats= data.frame(matrix(NA, nrow=1, ncol=8, dimnames= 
-                                 list(NULL, c("NumNodes", "MeanDegree", "Diameter", 
+    net.stats= data.frame(matrix(NA, nrow=1, ncol=11, dimnames= 
+                                 list(NULL, c("NumNodes", "MeanDegree", "MeanDegreeUnWt",
+                                              "VarDegree", "VarDegreeUnWt", "Diameter", 
                                               "WeightedDiameter","Reciprocity",
                                                "Transitivity","VertexConnectivity",
                                               "WeightedAssortativity"))))
   
-  node.stats=data.frame(matrix(NA, nrow = length(colnames(matdata)), 
-                               ncol = 6, dimnames = list(NULL, 
-                              c("NodeID", "DegreeWt", "Betweenness",
-                              "Closeness", "Transitivity", "ANND")) ) )
+    node.stats=data.frame(matrix(NA, nrow = length(colnames(matdata)), 
+                               ncol = 8, dimnames = list(NULL, 
+                              c("NodeID", "DegreeWt", "DegreeUnWt", "Betweenness",
+                                "BetweennessUnWt", "Closeness", "Transitivity", "ANND")) ) )
                                                                                                               
-   # make igraph object
-   ga<-graph.adjacency(matdata, mode="upper", weighted=TRUE)
-   ga2<-graph.adjacency(matdata, mode="upper", weighted=NULL)
-   ga3<- simplify(ga, remove.multiple=FALSE, remove.loops=TRUE)
+    # make igraph object
+    ga<-graph.adjacency(matdata, mode="upper", weighted=TRUE) # undirected/named/weighted/self
+    ga2<-graph.adjacency(matdata, mode="upper", weighted=NULL) # undirected/named/unweighted
+    ga3<- simplify(ga, remove.multiple=FALSE, remove.loops=TRUE) #undirected/named/weighted/noself
   
-   # calculate node.stats
-   node.stats$NodeID = V(ga)$name
-   node.stats$DegreeWt = graph.strength(ga)[]
-
-   node.stats$Betweenness = betweenness(ga, directed=FALSE)  # This function is the adaption to bipartite graphs as presented in Borgatti and Everett (1997).
-   node.stats$Closeness = closeness(ga, mode="all")
-   node.stats$ANND = graph.knn(ga3, weights=E(ga3)$weight)$knn
-   node.stats$Transitivity = transitivity(ga,type=c("local"))
+    # calculate node.stats
+    node.stats$NodeID = V(ga)$name
+    node.stats$DegreeWt = graph.strength(ga)
+    node.stats$DegreeUnWt = degree(ga3, mode = "all") # without self loops
+    
+    node.stats$Betweenness = betweenness(ga, directed=FALSE)  # weighted
+    node.stats$BetweennessUnWt = betweenness(simplify(ga2), directed = FALSE) # unweighted betweenness
+    node.stats$Closeness = closeness(ga, mode="all")
+    node.stats$ANND = graph.knn(ga3, weights=E(ga3)$weight)$knn
+    node.stats$Transitivity = transitivity(ga,type=c("local"))
                                                        
-   net.stats$NumNodes = length(node.stats$NodeID)                                        
-   net.stats$MeanDegree = mean(node.stats$DegreeWt)
-   net.stats$Diameter = diameter(ga,weights=(1/E(ga))) 
-   net.stats$WeightedDiameter = diameter(ga2) 
-   net.stats$Reciprocity=reciprocity(ga)
-   net.stats$Transitivity=transitivity(ga,type=c("global"))
-   net.stats$WeightedAssortativity=cor(node.stats$DegreeWt,node.stats$ANND)
+    net.stats$NumNodes = length(node.stats$NodeID)                                        
+    net.stats$MeanDegree = mean(node.stats$DegreeWt)
+    net.stats$VarDegree = var(node.stats$DegreeWt)
+    net.stats$MeanDegreeUnWt = mean(node.stats$DegreeUnWt)
+    net.stats$VarDegreeUnWt = var(node.stats$DegreeUnWt)
+    net.stats$Diameter = diameter(ga,weights=(1/E(ga))) 
+    net.stats$WeightedDiameter = diameter(ga2) 
+    net.stats$Reciprocity=reciprocity(ga)
+    net.stats$Transitivity=transitivity(ga,type=c("global"))
+    net.stats$WeightedAssortativity=cor(node.stats$DegreeWt,node.stats$ANND)
 
-   write.csv(node.stats, paste("node_stats_", name, ".csv", sep=""))
-   write.csv(net.stats, paste("net_stats_", name, ".csv", sep=""))
+    write.csv(node.stats, paste("node_stats_", name, ".csv", sep=""))
+    write.csv(net.stats, paste("net_stats_", name, ".csv", sep=""))
 }
 
 

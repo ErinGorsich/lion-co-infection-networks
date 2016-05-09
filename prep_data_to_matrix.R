@@ -15,7 +15,7 @@ make_edgelist= function(data){
 }
 
 make_matrix= function(data){
-  tmat<-matrix(NA, nrow=length(data[,1]), ncol=24,  # 24 rows here bc no FIV 
+  tmat<-matrix(NA, nrow=length(data[,1]), ncol=21,  # makes lions columns 
                dimnames=list(data$LION, colnames(colnames(plotdata[-1])))) # all infections minus FIV
   for (i in 1:nrow(tmat)){
     for (j in 1:ncol(tmat)){
@@ -26,7 +26,7 @@ make_matrix= function(data){
 }
 
 make_lionmatrix= function(data){
-  tmat<-matrix(NA, ncol=length(data[,1]), nrow=24,  # 24 rows here bc no FIV 
+  tmat<-matrix(NA, ncol=length(data[,1]), nrow=21,  # 21 rows here bc with FIV 
                dimnames=list(colnames(colnames(plotdata[-1])), data$LION)) # all infections minus FIV
   for (i in 1:nrow(tmat)){
     for (j in 1:ncol(tmat)){
@@ -37,7 +37,7 @@ make_lionmatrix= function(data){
 }
 
 make_all_matrix= function(data){
-  tmat<-matrix(NA, nrow=length(data[,1]), ncol=25,  # 25 rows here bc no FIV 
+  tmat<-matrix(NA, nrow=length(data[,1]), ncol=22,  # 22 rows here bc with FIV 
                dimnames=list(data$LION, colnames(plotdata))) # all infections minus FIV
   for (i in 1:nrow(tmat)){
     for (j in 1:ncol(tmat)){
@@ -47,7 +47,7 @@ make_all_matrix= function(data){
   return(tmat)
 }
 make_all_lionmatrix= function(data){
-  tmat<-matrix(NA, ncol=length(data[,1]), nrow=25,  # 25 rows here bc no FIV 
+  tmat<-matrix(NA, ncol=length(data[,1]), nrow=22,  # 22 rows here bc with FIV 
                dimnames=list(colnames(plotdata), data$LION)) # all infections minus FIV
   for (i in 1:nrow(tmat)){
     for (j in 1:ncol(tmat)){

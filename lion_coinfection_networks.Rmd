@@ -69,7 +69,7 @@ barplot2(height=c(virus$prev[order(virus$prev, decreasing=FALSE)],
          col=c(as.character(virus$col[order(virus$prev, decreasing=FALSE)]), 
                   as.character(gut$col[order(gut$prev, decreasing=FALSE)]), 
                   as.character(blood$col[order(blood$prev, decreasing=FALSE)])),
-         horiz=TRUE, las=1)
+         horiz=TRUE, las=1, cex.names = 0.8)
 ```
 
 
@@ -97,7 +97,7 @@ barplot2(height=c(virus2$prevneg[order(virus2$prev, decreasing=FALSE)],
          col=c(as.character(virus2$col[order(virus2$prev, decreasing=FALSE)]), 
                   as.character(gut2$col[order(gut2$prev, decreasing=FALSE)]), 
                   as.character(blood2$col[order(blood2$prev, decreasing=FALSE)])),
-         horiz=TRUE, las=1, main="FIV negative ", xlab="Prevalence")
+         horiz=TRUE, las=1, main="FIV negative ", xlab="Prevalence", cex.names= 0.8)
 barplot2(height=c(virus2$prevpos[order(virus2$prevpos, decreasing=FALSE)], 
                   gut2$prevpos[order(gut2$prevpos, decreasing=FALSE)], 
                   blood2$prevpos[order(blood2$prevpos, decreasing=FALSE)]), 
@@ -107,7 +107,7 @@ barplot2(height=c(virus2$prevpos[order(virus2$prevpos, decreasing=FALSE)],
          col=c(as.character(virus2$col[order(virus2$prevpos, decreasing=FALSE)]), 
                   as.character(gut2$col[order(gut2$prevpos, decreasing=FALSE)]), 
                   as.character(blood2$col[order(blood2$prevpos, decreasing=FALSE)])),
-         horiz=TRUE, las=1, main="FIV positive ", xlab="Prevalence")
+         horiz=TRUE, las=1, main="FIV positive ", xlab="Prevalence", cex.names= 0.8)
 ```
 
 
@@ -121,9 +121,13 @@ barplot2(height=c(virus2$prevpos[order(virus2$prevpos, decreasing=FALSE)],
 ##################################################
 ##################################################
 
+##################################################
 # all animals, FIV+ animals, FIV- animals
 ##################################################
-#temp<-NA
+# need networks from dataset without 'OTHER', 'BABESIA'
+drop <- c('THEILERIABABESIA', 'OTHER', 'BABESA')
+alldata <- alldata[, !names(alldata) %in% drop]
+plotdata <- plotdata[, !names(plotdata) %in% drop]
 all<-make_edgelist(alldata)
 all2<-make_all_matrix(alldata)  # for making parasite monoparte matrix
 all3<-make_all_lionmatrix(alldata) 
@@ -132,33 +136,37 @@ all_parnet<- tcrossprod(t(all2))  # nodes=parasites; edges=number of shared host
 all_lionnet<-tcrossprod(t(all3))  # nodes=lions; edges=number of shared parasites, symmetric
 #calculate_net_and_node_stats(all_parnet, name="allparasitenetwork")
 #calculate_net_and_node_stats(all_lionnet, name="alllionnetwork")
-####calculate_bipartite_net_and_node_stats()
+#???????####calculate_bipartite_net_and_node_stats()
 
+##################################################
 #, FIV+ animals, FIV- animals
 ##################################################
 temp<-NA
+dataneg <- dataneg[, !names(dataneg) %in% drop]
 FIVneg<- make_edgelist(dataneg)
 FIVneg2<-make_matrix(dataneg); FIVneg3<-make_lionmatrix(dataneg)
 colnames(FIVneg2) <- colnames(plotdata[-1])
-FIVneg_parnet<- tcrossprod(t(FIVneg2))  # nodes=parasites; edges=number of shared hosts, symmetric
-FIVneg_lionnet<-tcrossprod(t(FIVneg3))  # nodes=lions; edges=number of shared parasites, symmetric
-FIVneg_binet<- make_bipartite_matrix(dataneg)
+FIVneg_parnet<- tcrossprod(t(FIVneg2))  # nodes=parasites; edges=number of shared hosts, sym
+FIVneg_lionnet<-tcrossprod(t(FIVneg3))  # nodes=lions; edges=number of shared parasites, sym
+#####???????#FIVneg_binet<- make_bipartite_matrix(dataneg)
 
+datapos <- datapos[, !names(datapos) %in% drop]
 FIVpos<-make_edgelist(datapos)
 FIVpos2<-make_matrix(datapos); FIVpos3<-make_lionmatrix(datapos)
 colnames(FIVpos2) <- colnames(plotdata[-1])
-FIVpos_parnet<- tcrossprod(t(FIVpos2))  # nodes=parasites; edges=number of shared hosts, symmetric
-FIVpos_lionnet<-tcrossprod(t(FIVpos3))  # nodes=lions; edges=number of shared parasites, symmetric
+FIVpos_parnet<- tcrossprod(t(FIVpos2))  # nodes=parasites; edges=number of shared hosts, sym
+FIVpos_lionnet<-tcrossprod(t(FIVpos3))  # nodes=lions; edges=number of shared parasites, sym
 FIVpos_binet<- make_bipartite_matrix(datapos)
 
 #calculate_net_and_node_stats(FIVpos_parnet, name="FIVposparasitenetwork")
 #calculate_net_and_node_stats(FIVneg_parnet, name="FIVnegparasitenetwork")
 #calculate_net_and_node_stats(FIVpos_lionnet, name="FIVposlionnetwork")
 #calculate_net_and_node_stats(FIVneg_lionnet, name="FIVneglionnetwork")
+
 ####binets here!
 
-
-# In animals with high, very high, medium, and low FIV status
+##################################################
+# In animals with high, very high, medium, and low FIV status (Not Saved)
 ##################################################
 #FIVvh<- make_edgelist(alldata[alldata$FIVSTATUS=="Very High",])
 #FIV2vh<-make_matrix(alldata[alldata$FIVSTATUS=="Very High",])
@@ -175,7 +183,7 @@ FIVpos_binet<- make_bipartite_matrix(datapos)
 #parnet_FIVh<-tcrossprod(t(FIV2h))
 #FIV3h<-make_lionmatrix(alldata[alldata$FIVSTATUS=="High",])
 #lionnet_FIVh<-tcrossprod(t(FIV3h))
-#FIVh_binet<- make_bipartite_matrix(alldata[alldata$FIVSTATUS=="High",])
+####FIVh_binet<- make_bipartite_matrix(alldata[alldata$FIVSTATUS=="High",])
 
 
 #FIVmed<-make_edgelist(alldata[alldata$FIVSTATUS=="Medium",])
@@ -184,7 +192,7 @@ FIVpos_binet<- make_bipartite_matrix(datapos)
 #parnet_FIVmed<-tcrossprod(t(FIV2med))
 #FIV3med<-make_lionmatrix(alldata[alldata$FIVSTATUS=="Medium",])
 #lionnet_FIVmed<-tcrossprod(t(FIV3med))
-#FIVmed_binet<- make_bipartite_matrix(alldata[alldata$FIVSTATUS=="Medium",])
+#####FIVmed_binet<- make_bipartite_matrix(alldata[alldata$FIVSTATUS=="Medium",])
 
 #FIVlow<-make_edgelist(alldata[alldata$FIVSTATUS=="Low",])
 #FIV2low<-make_matrix(alldata[alldata$FIVSTATUS=="Low",])
@@ -192,7 +200,7 @@ FIVpos_binet<- make_bipartite_matrix(datapos)
 #parnet_FIVlow<-tcrossprod(t(FIV2low))
 #FIV3low<-make_lionmatrix(alldata[alldata$FIVSTATUS=="Low",])
 #lionnet_FIVlow<-tcrossprod(t(FIV3low))
-#FIVlow_binet<- make_bipartite_matrix(alldata[alldata$FIVSTATUS=="Low",])
+####FIVlow_binet<- make_bipartite_matrix(alldata[alldata$FIVSTATUS=="Low",])
 
 #calculate_net_and_node_stats(parnet_FIVvh, name="FIV_vh_parasitenetwork")
 #calculate_net_and_node_stats(parnet_FIVh, name="FIV_high_parasitenetwork")
@@ -206,17 +214,17 @@ FIVpos_binet<- make_bipartite_matrix(datapos)
 
 # Summarize parasite networks
 ##################################################
-pall<- read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/net_stats_allparasitenetwork.csv")
-pneg<- read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/net_stats_FIVnegparasitenetwork.csv")
-ppos<- read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/net_stats_FIVposparasitenetwork.csv")
+pall<- read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/lion_coinfection_networks_files/net_stats_allparasitenetwork.csv")
+pneg<- read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/lion_coinfection_networks_files/net_stats_FIVnegparasitenetwork.csv")
+ppos<- read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/lion_coinfection_networks_files/net_stats_FIVposparasitenetwork.csv")
 parasitenet<-rbind(pall[c(-1,-6, -8)], pneg[c(-1,-6, -8)], ppos[c(-1,-6, -8)])
 rownames(parasitenet)<-c("Overall_Network", "FIV_negative", "FIV_positive")
 
 # Summarize lion networks
 ##################################################
-lall<-read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/net_stats_alllionnetwork.csv")
-lneg<-read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/net_stats_FIVneglionnetwork.csv")
-lpos<-read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/net_stats_FIVposlionnetwork.csv")
+lall<-read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/lion_coinfection_networks_files/net_stats_alllionnetwork.csv")
+lneg<-read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/lion_coinfection_networks_files/net_stats_FIVneglionnetwork.csv")
+lpos<-read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/lion_coinfection_networks_files/net_stats_FIVposlionnetwork.csv")
 lionnet<-rbind(lall[c(-1,-6, -8)], lneg[c(-1,-6, -8)], lpos[c(-1,-6, -8)])
 rownames(lionnet)<-c("Overall_Network", "FIV_negative", "FIV_positive")
 # Summarize bipartite networks
@@ -233,7 +241,7 @@ For the parasite network, we define nodes as parasite/pathogen species.  An edge
 All network and node statistics were calculated with igraph (for monopartite networks).  In this context, we can interpret the following network statistics: 
 
 * Number of nodes: the number of parasites observed   
-* Mean Degree (Weighted): the average number of shared hosts per pathogen.  
+* Mean Degree (Unweighted): the average number of pathogens each pathogen is connected to by sharing a host. 
 * Diameter: The maximum number of steps in the set of shortest paths between all parasite pairs.  This is a measure of connectedness- if you are one parasite, how quickly can you get to all the parasites.
 * Transitivity: The ratio of the number of triangles and the number of connected triples in the graph.  Transitivity ranges from 0 to 1, with higher values indicating more connected subgraphs. It is a measure of clustering (high transitivity values mean you have clusters of pathogens that co-occur togeter- this will be interesting to see which ones are which!) 
 * Weighted Assortivity: The correlation between a parasites degree and the degree of the parasites connected to it.  Assortivity ranges from -1 to 1, with positive values indicating that nodes with high or low numbers of hosts interact mostly with nodes with similar degree values.  I interpret negative assortivity values as generalists pathogens are found with specialists.
@@ -255,7 +263,8 @@ For the lion network, we define nodes as lions and edges as sharing the same pat
 lionnet
 ```
 
-### Parasite network and lion network node statistics
+
+### Parasite and lion node statistics
 Node statistics are properties of each node.  For example, node statistics from the lion network tell you about how well connected or not each lion is based on its shared pathogens.  Node statistics are great because they can be regressed againsed age, sex, condition. I calcuated the following monopartite statistics and provide definitions based on the lion network: 
 
 * Weighted Degree: The number of lions connected to the focal lion by sharing a parasite.  If lions share 5 parasites, this value is 5. 
@@ -264,6 +273,85 @@ Node statistics are properties of each node.  For example, node statistics from 
 * Closeness: The number of steps required to reach every other lion.  This is another measure of centrality. 
 * Transitivity: For the focal lion, this is the ratio of the triangles connected to the vertex and the triples centered on the vertex.  I find this confusing and prefer the global measure. 
 * Average nearest neighbor degree: The average number of lions connected to the immediate neighbors of the focal lion. 
+
+Degree distributions:
+
+For each parasite, unweighted degree reflects the number of other parasites the focal parasite co-occurs with in at least one hosts.  In FIV + lions, the unweighted degree distribution (left) is shifted right, suggesting that the pathogen community is overall more connected. 
+
+For each parasite, weighted degree reflects the number of other parasites the focal parasite co-occurs with summed over all hosts.  The weighted degree distribution (right) follows similar patterns as the unweighted degree distribution. 
+
+This reflects the fact that in FIV + lions, 90% (19/21) of parasites co-occur with ten or more other parasites compared to 10% (2/21) in FIV - lions.  (NOTE: This could be because there are fewer FIV - lions but we can bootstrap test that!)
+```{r, degree_distributions_parasite, echo=FALSE}
+# plot histogram of degree distribution for FIV + and FIV -
+pall<- read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/lion_coinfection_networks_files/node_stats_allparasitenetwork.csv")
+pneg<- read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/lion_coinfection_networks_files/node_stats_FIVnegparasitenetwork.csv")
+ppos<- read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/lion_coinfection_networks_files/node_stats_FIVposparasitenetwork.csv")
+
+wtbreaks <- seq(0, 500, 50)
+unbreaks <- seq(0, 20, 2)
+
+negwt <- hist(pneg$DegreeWt , breaks = wtbreaks , plot = FALSE)
+poswt <- hist(ppos$DegreeWt , breaks = wtbreaks , plot = FALSE)
+negun <- hist(pneg$DegreeUnWt , breaks = unbreaks , plot = FALSE)
+posun <- hist(ppos$DegreeUnWt , breaks = unbreaks , plot = FALSE)
+
+par(mfrow = c(1,2), mar= c(4, 4, 3, 0.5))
+# unweighted
+plot(negun$mids[1:(length(negun$counts)-2)], negun$counts[1:(length(negun$counts)-2)], xlim = c(0, 20), ylim= c(0, 7), 
+     xlab = "Unweighted degree", ylab= "Frequency", las= 1, 
+     type = "b", pch= 19, lty = 1, lwd = 1, tck = -0.025, bty = "n", 
+     main= "Parasite network")
+lines(posun$mids, posun$counts, lwd = 1, lty = 3)
+points(posun$mids, posun$counts, pch= 21, lty = 3)
+
+# weighted
+par(mar= c(4, 2, 3, 0.5))
+plot(negwt$mids[1:length(negwt$counts[negwt$counts > 0])], negwt$counts[1:length(negwt$counts[negwt$counts > 0])], xlim = c(0, 450), ylim= c(0, 20), 
+     xlab = "Weighted degree", ylab= "", las= 1, 
+     type = "b", pch= 19, lty = 1, lwd = 1, tck = -0.025, bty = "n")
+lines(poswt$mids[1:(length(negwt$mids)- 1)], poswt$counts[1:(length(negwt$mids)- 1)], lwd = 1, lty = 3)
+points(poswt$mids[1:(length(negwt$mids)- 1)], poswt$counts[1:(length(negwt$mids)- 1)], pch= 21, lty = 3)
+
+legend("topright", c("FIV -", "FIV +"), lty=c(1, 3), pch=c(19, 21), lwd=1, bty="n")
+```
+
+
+For each lion in the lion network, unweighted degree reflects the number of other lions the focal lion is connected to by sharing any parasite while weighted degree is summed over each parasite.  In FIV + lions, ?
+
+```{r, degree_distributions_lion, echo=FALSE}
+# plot histogram of degree distribution for FIV + and FIV -
+pall<- read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/lion_coinfection_networks_files/node_stats_alllionnetwork.csv")
+pneg<- read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/lion_coinfection_networks_files/node_stats_FIVneglionnetwork.csv")
+ppos<- read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/lion_coinfection_networks_files/node_stats_FIVposlionnetwork.csv")
+
+wtbreaks <- seq(0, 400, 50)
+unbreaks <- seq(0, 90, 10)
+
+negwt <- hist(pneg$DegreeWt , breaks = wtbreaks , plot = FALSE)
+poswt <- hist(ppos$DegreeWt , breaks = wtbreaks , plot = FALSE)
+negun <- hist(pneg$DegreeUnWt , breaks = unbreaks , plot = FALSE)
+posun <- hist(ppos$DegreeUnWt , breaks = unbreaks , plot = FALSE)
+
+par(mfrow = c(1,2), mar= c(4, 4, 3, 0.5))
+# unweighted
+plot(negun$mids[1:length(negun$counts[negun$counts> 0])], negun$counts[1:length(negun$counts[negun$counts> 0])], xlim = c(0, 85), ylim= c(0, 50), 
+     xlab = "Unweighted degree", ylab= "Frequency", las= 1, 
+     type = "b", pch= 19, lty = 1, lwd = 1, tck = -0.025, bty = "n", 
+     main = "Lion network")
+lines(posun$mids, posun$counts, lwd = 1, lty = 3)
+points(posun$mids, posun$counts, pch= 21, lty = 3)
+
+# weighted
+par(mar= c(4, 2, 3, 0.5))
+plot(negwt$mids[1:length(negwt$counts[negwt$counts > 0])], negwt$counts[1:length(negwt$counts[negwt$counts > 0])], xlim = c(0, 450), ylim= c(0, 30), 
+     xlab = "Weighted degree", ylab= "", las= 1, 
+     type = "b", pch= 19, lty = 1, lwd = 1, tck = -0.025, bty = "n")
+lines(poswt$mids, poswt$counts, lwd = 1, lty = 3)
+points(poswt$mids, poswt$counts, pch= 21, lty = 3)
+
+legend("topright", c("FIV -", "FIV +"), lty=c(1, 3), pch=c(19, 21), lwd=1, bty="n")
+```
+
 
 ### Network statistics pt 3: Bipartite network
 
@@ -275,6 +363,7 @@ Virus nodes are green, gut parasite nodes are salmon, blue nodes are blood borne
 # Visualize bipartite network
 ##################################################
 ##################################################
+newdf <- newdf[!newdf$parasite %in% drop,]
 make_bipart_hive_plot(allb, datatype="all", demogdata=alldata, save_nodedf=FALSE, name="nosave")
 
 ```

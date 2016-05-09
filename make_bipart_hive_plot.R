@@ -13,14 +13,14 @@ make_bipart_hive_plot<-function(matdata, datatype, demogdata=alldata, save_noded
   ########################
   ########################		
   # make is so bloodbornes go on one side of the plot, rest on other!
- bloodborne = c("ERLICHIAANAPLASMA", "THEILERIABABESIA", "BABESA", 
+ bloodborne = c("ERLICHIAANAPLASMA",
                  "BFELIS", "BLEO", "BMICROTI", "BLENGUA", "TBICORNIS", 
                  "HEPATOZOON", "TANNAE", "BCANIS", "BROSSI", "BVOGELI")
  nonbloodborne<-c("ASCARIDS", "TAPES", "HOOKS", "COCCIDIA", "TOXO", "WHIPS",
-                  "FIV", "CDV", "FPV", "CALICI", "CORONA", "OTHER")
+                  "FIV", "CDV", "FPV", "CALICI", "CORONA")
  if(datatype=="all"){
   uppermat<-matdata[1:111,]
-  lowermat<-matdata[112:136,]
+  lowermat<-matdata[112:133,]
   for (i in 1:length(colnames(uppermat))){
     if (colnames(uppermat)[i] %in% bloodborne){
       uppermat[,i]<-0
