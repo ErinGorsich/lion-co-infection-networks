@@ -97,5 +97,6 @@ make_bipartite_matrix= function(data){
       }  
     }                          
   }
+  # keep rows and columns with no contacts... yes
   return(tmat)             
 }
