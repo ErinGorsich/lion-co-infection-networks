@@ -375,6 +375,7 @@ make_bipart_hive_plot(allb, datatype="all", demogdata=alldata, save_nodedf=FALSE
 
 Network in FIV positive hosts
 Note: Three largest circles are bloodbornes (CDV, TANNAE, TBICORNIS).  This is probably artifical from being a seroprevlaence measure.
+
 ```{r, visualization_FIVpos, echo=FALSE}
 ##################################################
 ##################################################
@@ -383,7 +384,8 @@ Note: Three largest circles are bloodbornes (CDV, TANNAE, TBICORNIS).  This is p
 ##################################################
 make_bipart_hive_plot(FIVpos_binet, datatype="all", demogdata=alldata, 
                       save_nodedf=FALSE, name="nosave")
-
+#make_bipart_hive_plot(FIVpos_binet, datatype="all", demogdata=alldata, 
+#                      save_nodedf=TRUE, name="binet_FIVpos")
 ```
 
 Network in FIV negative hosts
@@ -394,8 +396,74 @@ Network in FIV negative hosts
 # Visualize FIV+ bipartite network
 ##################################################
 ##################################################
-make_bipart_hive_plot(FIVneg_binet, datatype="all", demogdata=alldata, 
+make_bipart_hive_plot(FIVneg_binet, datatype="subset", demogdata=alldata, 
                       save_nodedf=FALSE, name="nosave")
+#make_bipart_hive_plot(FIVneg_binet, datatype="subset", demogdata=alldata, 
+#                      save_nodedf=TRUE, name="binet_FIVneg")
+```
+
+## Analysis: Do degree distribution in FIV+ and FIV - lions differ
+
+The mean parasite richness in FIV- lions is 4 compared to 5 in FIV+ lions.  The variance in FIV- lions is 2.1 vs. 4.9 in FIV+ lions.  Overall, there does not appear to be a clear shift towards higher or lower parasite richness among hosts.  There are more hosts in the FIV
+Is that driven by more than sample size? 
+
+```{r, degree_distributions_bipartite, echo=FALSE}
+# plot histogram of degree distribution for FIV + and FIV -
+bineg<- read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/lion_coinfection_networks_files/nodedfbinet_FIVneg.csv")
+binegl<- bineg[bineg$axis==1,]
+bipos<- read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/lion_coinfection_networks_files/nodedfbinet_FIVpos.csv")
+biposl<- bipos[bipos$axis==1,]
+
+
+breaks <- seq(0, 10, 1)
+# Note: Value divided by maximum value in the network...
+poswt <- hist(biposl$degree_nonorm , breaks = breaks , plot = FALSE)
+negwt <- hist(binegl$degree_nonorm , breaks = breaks , plot = FALSE)
+
+# weighted
+plot(negwt$mids, negwt$counts, xlim = c(0, 10), ylim= c(0, 17), 
+     xlab = "Bipartite Degree (Parasite richness)", ylab= "Number of lions", las= 1, 
+     type = "b", pch= 19, lty = 1, lwd = 1, tck = -0.025, bty = "n")
+lines(poswt$mids, poswt$counts, lwd = 1, lty = 3)
+points(poswt$mids, poswt$counts, pch= 21, lty = 3)
+
+legend("topright", c("FIV -", "FIV +"), lty=c(1, 3), pch=c(19, 21), lwd=1, bty="n")
+```
+
+
+## Analysis: Do we  see higher centrality values in older lions and males?
+
+```{r, age_sex_patterns, echo=FALSE}
+temp<-as.data.frame(tapply(binegl$degree, list(binegl$malefemale, binegl$agecat), mean))
+n<- temp[,-2]
+n[is.na(n)]<-0
+barplot2(as.matrix(n), beside=TRUE, col=c("darkslategray2", "darkslategray"), ylab= "Weighted Degree", main= "FIV- lions")
+legend("topright", legend= c("Female", "Male"), fill=c("darkslategray2", "darkslategray"), cex=0.7, bty="n")
+temp<- as.data.frame(tapply(biposl$degree, list(biposl$malefemale, biposl$agecat), mean))
+p<- temp[,-4]
+barplot2(as.matrix(p), beside=TRUE, col=c("darkslategray2", "darkslategray"), ylab= "Weighted Degree", main= "FIV+ lions", las=1, names.arg =c("Cub", "Geriatric", "Juv", "Prime", "SubAd"))
+
+#tapply(binegl$degree, list(binegl$malefemale, binegl$agecat), sd)
+#tapply(biposl$degree, list(biposl$malefemale, biposl$agecat), sd)
+
+
+temp<-as.data.frame(tapply(binegl$betweenness, list(binegl$malefemale, binegl$agecat), mean))
+n<- temp[,-2]
+n[is.na(n)]<-0
+barplot2(as.matrix(n), beside=TRUE, col=c("darkslategray2", "darkslategray"), ylab= "Betweenness Centrality", main= "FIV- lions")
+legend("topright", legend= c("Female", "Male"), fill=c("darkslategray2", "darkslategray"), cex=0.7, bty="n")
+temp<- as.data.frame(tapply(biposl$betweenness, list(biposl$malefemale, biposl$agecat), mean))
+p<- temp[,-4]
+barplot2(as.matrix(p), beside=TRUE, col=c("darkslategray2", "darkslategray"), ylab= "Betweenness Centrality", main= "FIV+ lions", las=1, names.arg =c("Cub", "Geriatric", "Juv", "Prime", "SubAd"))
+
+tapply(binegl$degree, list(binegl$malefemale, binegl$agecat), sd)
+tapply(biposl$degree, list(biposl$malefemale, biposl$agecat), sd)
+
+
 
 ```
+
+## Analysis: Do we see lower centrality measures in animals with both hookworms and FIV?
+
+
 

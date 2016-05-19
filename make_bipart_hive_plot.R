@@ -47,7 +47,7 @@ make_bipart_hive_plot<-function(matdata, datatype, demogdata=alldata, save_noded
 
     is.bipartite(ga)
   
-    nodedf<- data.frame(name=V(ga)$name, degree=NA, closeness= NA, betweenness = NA, radius=NA, color=NA, axis= NA, 
+    nodedf<- data.frame(name=V(ga)$name, degree=NA, degree_nonorm= NA, closeness= NA, betweenness = NA, radius=NA, color=NA, axis= NA, 
                       symbol=19, malefemale=NA, agecat=NA, 	size=NA, normconstant = NA)
   
     # specify node information (circle size= total degree *1.5; axis by age category)
@@ -63,6 +63,7 @@ make_bipart_hive_plot<-function(matdata, datatype, demogdata=alldata, save_noded
     nodedf$axis<-1
     nodedf$axis[V(ga)$type==FALSE]<-2
   
+    nodedf$degree_nonorm<-degree(ga)
     nodedf$degree<-bipartite.degree.centrality(ga)$Bipartite.Degree.Centrality
     nodedf$betweenness<-bipartite.betweenness.centrality(ga)$Bipartite.Betweenness.Centrality
     nodedf$closeness<-bipartite.closeness.centrality(ga)$Bipartite.Closeness.Centrality
@@ -78,23 +79,42 @@ make_bipart_hive_plot<-function(matdata, datatype, demogdata=alldata, save_noded
     nodedf$size[length(nodedf$axis[nodedf$axis==1]):length(nodedf$axis)] <- nodedf$degree[
         length(nodedf$axis[nodedf$axis==1]):length(nodedf$axis)]*1.2 
 
-    # specify location of node on axis 1 as the sum of the total size.
-    nodedf$radius<-NA
-    nodedf$radius[1]<-nodedf$size[1]
+    if (datatype == "all"){
+        # specify location of node on axis 1 as the sum of the total size.
+        nodedf$radius<-NA
+        nodedf$radius[1]<-nodedf$size[1]
+ 
+        for (i in 2:length(nodedf$axis[nodedf$axis==1])){
+            nodedf$radius[i]<-nodedf$size[i] + nodedf$radius[i-1] + 0.2
+        }
   
-    for (i in 2:length(nodedf$axis[nodedf$axis==1])){
-        nodedf$radius[i]<-nodedf$size[i] + nodedf$radius[i-1] + 0.2
-    }
-  
-    # specify location of node on axis 2 as the sum of the total size.
-    nodedf$radius[length(nodedf$axis[nodedf$axis==1]) + 1] <- nodedf$size[length(
-        nodedf$axis[nodedf$axis==1])+1]+.5
+        # specify location of node on axis 2 as the sum of the total size.
+        nodedf$radius[length(nodedf$axis[nodedf$axis==1]) + 1] <- nodedf$size[length(
+            nodedf$axis[nodedf$axis==1])+1]+.5
 
-    for (i in (length(nodedf$axis[nodedf$axis==1])+2):((length(nodedf$axis[nodedf$axis==1]))+ 
+        for (i in (length(nodedf$axis[nodedf$axis==1])+2):((length(nodedf$axis[nodedf$axis==1]))+ 
                                                          length(nodedf$axis[nodedf$axis==2])) ){
-      nodedf$radius[i]<-nodedf$size[i]+ nodedf$radius[i-1]+0.2
+            nodedf$radius[i]<-nodedf$size[i]+ nodedf$radius[i-1]+0.2
+        }
     }
-  
+    if (datatype == "subset"){
+        nodedf$radius<-NA
+        nodedf$radius[1]<-nodedf$size[1]
+        
+        for (i in 2:length(nodedf$axis[nodedf$axis==1])){
+            nodedf$radius[i]<-nodedf$size[i] + nodedf$radius[i-1]
+        }
+        
+        # specify location of node on axis 2 as the sum of the total size.
+        nodedf$radius[length(nodedf$axis[nodedf$axis==1]) + 1] <- nodedf$size[length(
+            nodedf$axis[nodedf$axis==1])+1]
+        
+        for (i in (length(nodedf$axis[nodedf$axis==1])+2):((length(nodedf$axis[nodedf$axis==1]))+ 
+                                                               length(nodedf$axis[nodedf$axis==2])) ){
+            nodedf$radius[i]<-nodedf$size[i]+ nodedf$radius[i-1]
+        }
+    }
+    
     if (save_nodedf){
         write.csv(nodedf, paste("nodedf", name, ".csv", sep=""))
     }
