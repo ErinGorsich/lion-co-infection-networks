@@ -85,7 +85,7 @@ colnames(mat)[df1$order] == df1$region  # test, should be the same
 
 ####################
 #tiff(filename="beef_circle2", height=90, width=90, units="mm", res=600, compression="lzw")
-par(mar = c(1,1,1,1))  #0000 initially
+par(mar = c(2,2,2,2))  #0000 initially
 circos.clear()
 #Set how Circos will draw external ring, direction and starting point 
 circos.par(cell.padding = c(0, 0, 0, 0), clock.wise = TRUE, start.degree = 90, gap.degree=0.6)  # first round figs at 0.8
@@ -94,7 +94,7 @@ circos.initialize(factors = factors, xlim = cbind(df1$xmin, df1$xmax))
 ##########################
 # Plot outside
 
-circos.trackPlotRegion(
+#circos.trackPlotRegion(
 	#Unique row values
 	#factors = as.factor(df1$order),  #neworder to go by largest size
  	ylim = c(0, 1),
@@ -103,15 +103,43 @@ circos.trackPlotRegion(
 	#Colors for outer ring by category
  	#bg.col =df1$rcol,
  	#track.height = 0.05,
+# 	panel.fun = function(x, y){
+#		name = get.cell.meta.data("sector.index")
+#  		i = get.cell.meta.data("sector.numeric.index")
+#  		xlim = get.cell.meta.data("xlim")
+#  		ylim = get.cell.meta.data("ylim")
+  		#Details for text style in outer ring
+  		#circos.text(mean(xlim), 1, name, adj = c(0.5, 0),facing="bending",cex=0.4)  # previous label as sector.name didn't work?
+  		#circos.text(mean(xlim), 1, name, adj = c(0.5, 0), facing = "clockwise", cex = 0.6)
+#  		circos.rect(xleft=xlim[1], ybottom=ylim[1], xright=xlim[2], ytop=ylim[2], col = df1$rcol[i], border=df1$lcol[i], lwd=0.4)
+#  		circos.lines(x=rep(df1$xmax_mid[i],2), y=c(0,1), col=df1$lcol[i], lwd=0.4)
+#  		print(name)
+#	}
+#)
+
+circos.trackPlotRegion(
+	#Unique row values
+	#factors = as.factor(df1$order),  #neworder to go by largest size
+ 	ylim = c(0, 1.4),
+	# bg.border = NA,
+	#Colors for outer ring by category
+ 	#bg.col =df1$rcol,
+ 	#track.height = 0.05,
  	panel.fun = function(x, y){
 		name = get.cell.meta.data("sector.index")
   		i = get.cell.meta.data("sector.numeric.index")
   		xlim = get.cell.meta.data("xlim")
   		ylim = get.cell.meta.data("ylim")
+  		theta = mean(get.cell.meta.data("xplot"))
   		#Details for text style in outer ring
-  		circos.text(mean(xlim), 1, name, adj = c(0.5, 0),facing="bending",cex=0.4)  # previous label as sector.name didn't work?
+  		#circos.text(mean(xlim), 1, name, adj = c(0.5, 0),facing="bending",cex=0.4)  # previous label as sector.name didn't work?
   		circos.rect(xleft=xlim[1], ybottom=ylim[1], xright=xlim[2], ytop=ylim[2], col = df1$rcol[i], border=df1$lcol[i], lwd=0.4)
-  		circos.lines(x=rep(df1$xmax_mid[i],2), y=c(0,1), col=df1$lcol[i], lwd=0.4)
+  		#circos.lines(x=rep(df1$xmax_mid[i],2), y=c(0,1), col=df1$lcol[i], lwd=0.4)
+  		if (theta < 90 || theta > 270){
+  			circos.text(mean(xlim), 0.3, name, adj = c(0, 0), facing = "clockwise", cex = 0.6)
+  		} else {
+  			circos.text(mean(xlim), 1.2, name, adj = c(0, 0), facing = "reverse.clockwise", cex = 0.6)
+  		}
   		print(name)
 	}
 )
@@ -127,9 +155,36 @@ df1$sum3<-df1$xmax_mid
 df1<-df1[order(df1$neworder),]  # to match order of m
 
 #df2 <- cbind(as.data.frame(mat),orig=rownames(mat),  stringsAsFactors=FALSE)
+#df2 <- cbind(as.data.frame(mat), orig = seq(1:length(rownames(mat))))
+#df2 <- reshape(df2, idvar="orig", varying=list(1:n), direction="long",
+#	timevar="dest", time=seq(1:length(rownames(mat))),  v.names = "m")
+
+# added by me to df2, adds neworig and dest columns to df2
+#df2$neworig<-NA
+#df2$newdest<-NA
+#for (i in 1: length(df2$orig)){
+#	for (j in 1: length(df1$order)){
+#		if (df2$orig[i]==df1$order[j]) df2$neworig[i]<-df1$neworder[j]
+#		if (df2$dest[i]==df1$order[j]) df2$newdest[i]<-df1$neworder[j]
+#	}
+#}
+
+#df2 <- arrange(df2, neworig, desc(m))  # here m is the column
+#loose zero links
+#df2 <- subset(df2, m>0)
+
+#for(k in 1:nrow(df2)){
+#  #i,j reference of flow matrix
+#  i<-match(df2$neworig[k], df1$neworder)
+#  j<-match(df2$newdest[k], df1$neworder)
+#  q<-match(df2$orig[k], df1$neworder)  # at k=1 want q=26
+#  p<-match(df2$dest[k], df1$neworder)
+
+# new, non-directed
 df2 <- cbind(as.data.frame(mat), orig = seq(1:length(rownames(mat))))
 df2 <- reshape(df2, idvar="orig", varying=list(1:n), direction="long",
 	timevar="dest", time=seq(1:length(rownames(mat))),  v.names = "m")
+df2 <- df2[df2$orig > df2$dest,]
 
 # added by me to df2, adds neworig and dest columns to df2
 df2$neworig<-NA
@@ -141,25 +196,38 @@ for (i in 1: length(df2$orig)){
 	}
 }
 
-df2 <- arrange(df2, neworig, desc(m))  # here m is the column
 #loose zero links
 df2 <- subset(df2, m>0)
+df2$ocol <- df1$rcol[match(df2$neworig, df1$neworder)]
+df2$dcol <- df1$rcol[match(df2$newdest, df1$neworder)]
+df2$within <- 1
+df2$within[!(df2$ocol == df2$dcol)] <- 0
+df1$sum1 <- 0
+df2 <- arrange(df2, within, neworig, desc(m))  # here m is the column
 
-for(k in 1:nrow(df2)){
-  #i,j reference of flow matrix
-  i<-match(df2$neworig[k], df1$neworder)
-  j<-match(df2$newdest[k], df1$neworder)
-  q<-match(df2$orig[k], df1$neworder)  # at k=1 want q=26
-  p<-match(df2$dest[k], df1$neworder)
-
- #plot link  
- # this way makes it so you plot incomming shipments followed by outgoing shipments. 
-  circos.link(sector.index1 = df1$region[i], point1=c(df1$sum1[i], df1$sum1[i] + abs(m[q, p])),  # specify origin link
-          sector.index2=df1$region[j], point2=c(df1$sum2[j], df1$sum2[j] + abs(m[q, p])),      # specify destination link
-          col = df1$rcol[i],
-          border= df1$lcol[i], lwd=0.4, rou=0.75
-          )
-  #update sum1 and sum2 for use when plotting the next link
-  df1$sum1[i] = df1$sum1[i] + abs(m[q, p])
-  df1$sum2[j] = df1$sum2[j] + abs(m[q, p])
+for (k in 1:nrow(df2)){
+	#i,j reference of flow matrix
+	i<-match(df2$neworig[k], df1$neworder)
+	j<-match(df2$newdest[k], df1$neworder)
+	q<-match(df2$orig[k], df1$neworder)  # at k=1 want q=26
+	p<-match(df2$dest[k], df1$neworder)
+ 
+#plot link  
+# this way makes it so you plot incomming shipments followed by outgoing shipments. 
+  	if(df1$rcol[i] == df1$rcol[j]){
+		circos.link(sector.index1 = df1$region[i], point1=c(df1$sum1[i], df1$sum1[i] + abs(2*m[q, p])), # specify origin link (half way )
+			sector.index2=df1$region[j], point2=c(df1$sum2[j], df1$sum2[j] + abs(2*m[q, p])),       # specify destination link
+			col = df1$rcol[i],
+			border= df1$lcol[i], lwd=0.4, rou=0.75)
+	} else {
+		circos.link(sector.index1 = df1$region[i], point1=c(df1$sum1[i], df1$sum1[i] + abs(2*m[q, p])), # specify origin link (half way )
+			sector.index2=df1$region[j], point2=c(df1$sum2[j], df1$sum2[j] + abs(2*m[q, p])),       # specify destination link
+			col = "lightgray",
+			border= "darkgray", lwd=0.4, rou=0.75)
+	}        
+#update sum1 and sum2 for use when plotting the next link
+	df1$sum1[i] = df1$sum1[i] + abs(2*m[q, p])
+	df1$sum1[j] = df1$sum1[j] + abs(2*m[q, p])
+	df1$sum2[i] = df1$sum2[i] + abs(2*m[q, p])
+	df1$sum2[j] = df1$sum2[j] + abs(2*m[q, p])
 }
