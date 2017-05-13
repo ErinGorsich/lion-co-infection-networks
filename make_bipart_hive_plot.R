@@ -127,7 +127,7 @@ make_bipart_hive_plot<-function(matdata, datatype, demogdata=alldata, save_noded
     edf$col<-nodedf$color[match(edf$dnode, nodedf$name)]
     for (i in 1:length(edf[,1]))
         if (edf$dnode[i] %in% alldata$LION){
-            edf$col[i]<-"lightblue3"      
+			edf$col[i]<-as.character(newdf$col[newdf$type == "bloodborne"][1])          
     }
 
     nodedf$axis<-as.integer(nodedf$axis)
