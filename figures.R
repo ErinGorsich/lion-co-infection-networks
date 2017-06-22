@@ -59,7 +59,7 @@ FIVpos2<-make_matrix(datapos); colnames(FIVpos2) <- colnames(plotdata[-1])
 FIVpos3<-make_lionmatrix(datapos); rownames(FIVpos3) <- colnames(plotdata[-1])
 
 # parnet: nodes=parasites; edges= # of shared hosts, symmetric
-all_parnet<- tcrossprod(t(all2)) 
+all_parnet<- tcrossprod(t(all2))
 FIVneg_parnet<- tcrossprod(t(FIVneg2))
 FIVpos_parnet<- tcrossprod(t(FIVpos2))
 # all_lionnet: nodes=lions; edges=number of shared parasites, symmetric
@@ -79,13 +79,12 @@ calculate_net_and_node_stats(FIVneg_parnet, name="FIVnegparasitenetwork")
 calculate_net_and_node_stats(FIVpos_lionnet, name="FIVposlionnetwork")
 calculate_net_and_node_stats(FIVneg_lionnet, name="FIVneglionnetwork")
 
-###########################################################
-###########################################################
-# Figure 1: Overall Hive Plot with FIV highlihgted
-###########################################################
-###########################################################
-# Hive plots
 
+###########################################################
+###########################################################
+# Figure 0: Ugly network diagram & Overall Hive Plot with FIV highlihgted
+###########################################################
+###########################################################
 # specify color choices by type
 gut = c("ASCARIDS", "TAPES", "HOOKS", "COCCIDIA", "TOXO", "WHIPS")
 bloodborne = c("ERLICHIAANAPLASMA", "BFELIS", "BLEO", 
@@ -109,13 +108,92 @@ newdf<-data.frame(parasite=c(virus, gut, bloodborne),
     		rep("#66CCCC", length(gut)), 
 		rep("#FF9933", length(bloodborne))) )
 
+# Ugly network diagram
+# all parasites: 
+set.seed(1)
+ga<-graph.adjacency(all_parnet, mode="upper", weighted=TRUE) # undirected/named/weighted/self
+ga_all<- simplify(ga, remove.multiple=FALSE, remove.loops=TRUE)
+V(ga_all)$color <- as.character(newdf$col[match( V(ga_all)$name, newdf$parasite)])
 
+ga<-graph.adjacency(FIVneg_parnet, mode="upper", weighted=TRUE) # undirected/named/weighted/self
+ga_neg<- simplify(ga, remove.multiple=FALSE, remove.loops=TRUE)
+V(ga_neg)$color <- as.character(newdf$col[match( V(ga_neg)$name, newdf$parasite)])
 
-# function makes plot
+ga<-graph.adjacency(FIVpos_parnet, mode="upper", weighted=TRUE) # undirected/named/weighted/self
+ga_pos<- simplify(ga, remove.multiple=FALSE, remove.loops=TRUE)
+V(ga_pos)$color <- as.character(newdf$col[match(V(ga_pos)$name, newdf$parasite)])
+# test1
+par(mfrow = c(1,3))
+plot(ga_all, main = "All parasites", vertex.label = NA)
+plot(ga_neg, main = "FIV -", vertex.label = NA)
+plot(ga_pos, main = "FIV +", vertex.label = NA)
+
+# test 2: ring layout
+ga_pos$layout <- layout.circle
+ga_neg$layout <- layout.circle
+par(mfrow = c(1,2), mar = c(1, 0.5, 1, 0.1))
+plot(ga_neg, main = "FIV -", vertex.label = NA)
+plot(ga_pos, main = "FIV +", vertex.label = NA)
+
+# test3
+# size of circle proportional to abundance...
+n <- data.frame(degree(ga_neg, mode = "all"))[,1] 
+p <- data.frame(degree(ga_pos, mode = "all"))[,1]
+V(ga_neg)$size <- (n + 1)# / (6*max(c(n, p))) # default size is 15
+V(ga_pos)$size <- (p + 1)# / (6*max(c(n, p)))
+par(mfrow = c(1,2), mar = c(1, 0.5, 1, 0.1))
+plot(ga_neg, main = "FIV -", vertex.label = NA)
+plot(ga_pos, main = "FIV +", vertex.label = NA)
+
+# test3 with random layout
+n <- data.frame(degree(ga_neg, mode = "all"))[,1] 
+p <- data.frame(degree(ga_pos, mode = "all"))[,1]
+V(ga_neg)$size <- (n + 1)# / (6*max(c(n, p))) # default size is 15
+V(ga_pos)$size <- (p + 1)# / (6*max(c(n, p)))
+par(mfrow = c(1,2), mar = c(1, 0.5, 1, 0.1))
+plot(ga_neg, main = "FIV -", vertex.label = NA, layout = layout.random)
+plot(ga_pos, main = "FIV +", vertex.label = NA, layout = layout.random)
+
+# test4- width of line proporitonal to number of shared hosts
+#E(ga_neg)$width <-  # default is 1
+#E(ga_pos)$width <-
+
+numlions <- length(rownames(FIVneg2))
+par(mfrow = c(4, 5), mar = c(1, 0.5, 1, 0.1))
+plot(ga_neg, main = "FIV -", vertex.label = NA, layout = layout.random)
+for(i in 1:19){
+	ss_FIVpos2 <- sample_n(data.frame(FIVpos2), numlions, replace = FALSE)
+	FIVpos_parnet<- tcrossprod(t(ss_FIVpos2))
+
+	# make networks and plot	
+	ga<-graph.adjacency(FIVpos_parnet, mode="upper", weighted=TRUE) 
+	ga_pos<- simplify(ga, remove.multiple=FALSE, remove.loops=TRUE)
+	V(ga_pos)$color <- as.character(newdf$col[match(V(ga_pos)$name, newdf$parasite)])
+	V(ga_pos)$size <- 1 + data.frame(degree(ga_pos, mode = "all"))[,1]
+
+	plot(ga_pos, main = "Subsample FIV +", vertex.label = NA, layout = layout.random)
+	rm(ga, gapos, ss_FIVpos2)
+}
+
+plot(ga_neg, main = "FIV -", vertex.label = NA, layout = layout.circle)
+for(i in 1:19){
+	ss_FIVpos2 <- sample_n(data.frame(FIVpos2), numlions, replace = FALSE)
+	FIVpos_parnet<- tcrossprod(t(ss_FIVpos2))
+
+	# make networks and plot	
+	ga<-graph.adjacency(FIVpos_parnet, mode="upper", weighted=TRUE) 
+	ga_pos<- simplify(ga, remove.multiple=FALSE, remove.loops=TRUE)
+	V(ga_pos)$color <- as.character(newdf$col[match(V(ga_pos)$name, newdf$parasite)])
+	V(ga_pos)$size <- 1 + data.frame(degree(ga_pos, mode = "all"))[,1]
+
+	plot(ga_pos, main = "Subsample FIV +", vertex.label = NA, layout = layout.circle)
+	rm(ga, gapos, ss_FIVpos2)
+}
+
+# function makes hive plot
 png("Figure1_hive_alldata.png", height = 600, width = 1200, units = "px")
 make_bipart_hive_plot(allb, datatype="all", demogdata=alldata, save_nodedf=FALSE, name="nosave")
 dev.off()
-
 
 
 ###########################################################
