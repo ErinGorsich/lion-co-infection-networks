@@ -9,16 +9,16 @@
 ###########################################################
 
 ###########################################################
-# read in HB's data, packages and scripts
+# Read in HB's data, packages and scripts
 ###########################################################
 rm(list = ls())
 setwd("~/GitHub/lion-co-infection-networks")
-alldata<-read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/COINCLIQ.csv")
+alldata <- read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/COINCLIQ.csv")
 drop <- c('THEILERIABABESIA', 'OTHER', 'BABESA') # take out some
-alldata <- alldata[, c(!names(alldata) %in% drop)]
-dataneg<-alldata[alldata$FIV=="Negative",]
-datapos<-alldata[alldata$FIV=="Positive",]
-plotdata<-alldata[,c(11:length(colnames(alldata)))]
+alldata <- alldata[ , c(!names(alldata) %in% drop)]
+dataneg <- alldata[alldata$FIV == "Negative",]
+datapos <- alldata[alldata$FIV == "Positive",]
+plotdata <- alldata[ , c(11:length(colnames(alldata)))]
 
 library(lattice)  
 library(bipartite)
@@ -50,34 +50,34 @@ source("mod.edge2HPD.R")
 # all animals, FIV+ animals, FIV- animals
 ##################################################
 # turn data into matricies for monopartite and bipartite nets
-all2<-make_all_matrix(alldata)  
-all3<-make_all_lionmatrix(alldata) 
-allb<-make_all_bipartite_matrix(alldata)
-FIVneg2<-make_matrix(dataneg); colnames(FIVneg2) <- colnames(plotdata[-1])
-FIVneg3<-make_lionmatrix(dataneg); rownames(FIVneg3) <- colnames(plotdata[-1])
-FIVpos2<-make_matrix(datapos); colnames(FIVpos2) <- colnames(plotdata[-1])
-FIVpos3<-make_lionmatrix(datapos); rownames(FIVpos3) <- colnames(plotdata[-1])
+all2 <- make_all_matrix(alldata)  
+all3 <- make_all_lionmatrix(alldata) 
+allb <- make_all_bipartite_matrix(alldata)
+FIVneg2 <- make_matrix(dataneg); colnames(FIVneg2) <- colnames(plotdata[-1])
+FIVneg3 <- make_lionmatrix(dataneg); rownames(FIVneg3) <- colnames(plotdata[-1])
+FIVpos2 <- make_matrix(datapos); colnames(FIVpos2) <- colnames(plotdata[-1])
+FIVpos3 <- make_lionmatrix(datapos); rownames(FIVpos3) <- colnames(plotdata[-1])
 
 # parnet: nodes=parasites; edges= # of shared hosts, symmetric
-all_parnet<- tcrossprod(t(all2))
-FIVneg_parnet<- tcrossprod(t(FIVneg2))
-FIVpos_parnet<- tcrossprod(t(FIVpos2))
+all_parnet <- tcrossprod(t(all2))
+FIVneg_parnet <- tcrossprod(t(FIVneg2))
+FIVpos_parnet <- tcrossprod(t(FIVpos2))
 # all_lionnet: nodes=lions; edges=number of shared parasites, symmetric
-all_lionnet<-tcrossprod(t(all3))
-FIVneg_lionnet<-tcrossprod(t(FIVneg3))  
-FIVpos_lionnet<-tcrossprod(t(FIVpos3))
+all_lionnet <- tcrossprod(t(all3))
+FIVneg_lionnet <- tcrossprod(t(FIVneg3))  
+FIVpos_lionnet <- tcrossprod(t(FIVpos3))
 
 # Bipartite networks: nodes = parasites and lions, linkes = infection
-FIVpos_binet<- make_bipartite_matrix(datapos)
-FIVneg_binet<- make_bipartite_matrix(dataneg)
+FIVpos_binet <- make_bipartite_matrix(datapos)
+FIVneg_binet <- make_bipartite_matrix(dataneg)
 
 # summarize and write results to csv: 
-calculate_net_and_node_stats(all_parnet, name="allparasitenetwork")
-calculate_net_and_node_stats(all_lionnet, name="alllionnetwork")
-calculate_net_and_node_stats(FIVpos_parnet, name="FIVposparasitenetwork")
-calculate_net_and_node_stats(FIVneg_parnet, name="FIVnegparasitenetwork")
-calculate_net_and_node_stats(FIVpos_lionnet, name="FIVposlionnetwork")
-calculate_net_and_node_stats(FIVneg_lionnet, name="FIVneglionnetwork")
+calculate_net_and_node_stats(all_parnet, name = "allparasitenetwork")
+calculate_net_and_node_stats(all_lionnet, name ="alllionnetwork")
+calculate_net_and_node_stats(FIVpos_parnet, name ="FIVposparasitenetwork")
+calculate_net_and_node_stats(FIVneg_parnet, name ="FIVnegparasitenetwork")
+calculate_net_and_node_stats(FIVpos_lionnet, name ="FIVposlionnetwork")
+calculate_net_and_node_stats(FIVneg_lionnet, name ="FIVneglionnetwork")
 
 
 ###########################################################
@@ -116,11 +116,11 @@ ga_all<- simplify(ga, remove.multiple=FALSE, remove.loops=TRUE)
 V(ga_all)$color <- as.character(newdf$col[match( V(ga_all)$name, newdf$parasite)])
 
 ga<-graph.adjacency(FIVneg_parnet, mode="upper", weighted=TRUE) # undirected/named/weighted/self
-ga_neg<- simplify(ga, remove.multiple=FALSE, remove.loops=TRUE)
+ga_neg <- simplify(ga, remove.multiple=FALSE, remove.loops=TRUE)
 V(ga_neg)$color <- as.character(newdf$col[match( V(ga_neg)$name, newdf$parasite)])
 
-ga<-graph.adjacency(FIVpos_parnet, mode="upper", weighted=TRUE) # undirected/named/weighted/self
-ga_pos<- simplify(ga, remove.multiple=FALSE, remove.loops=TRUE)
+ga <- graph.adjacency(FIVpos_parnet, mode="upper", weighted=TRUE) # undirected/named/weighted/self
+ga_pos <- simplify(ga, remove.multiple=FALSE, remove.loops=TRUE)
 V(ga_pos)$color <- as.character(newdf$col[match(V(ga_pos)$name, newdf$parasite)])
 # test1
 par(mfrow = c(1,3))
@@ -195,17 +195,16 @@ png("Figure1_hive_alldata.png", height = 600, width = 1200, units = "px")
 make_bipart_hive_plot(allb, datatype="all", demogdata=alldata, save_nodedf=FALSE, name="nosave")
 dev.off()
 
-
 ###########################################################
 ###########################################################
 # Figure 2: Richness by FIV status
 ###########################################################
 ###########################################################
 # read only necessary results back in ...
-bineg<- read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/lion_coinfection_networks_files/nodedfbinet_FIVneg.csv")
-binegl<- bineg[bineg$axis==1,]
-bipos<- read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/lion_coinfection_networks_files/nodedfbinet_FIVpos.csv")
-biposl<- bipos[bipos$axis==1,]
+bineg <- read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/lion_coinfection_networks_files/nodedfbinet_FIVneg.csv")
+binegl <- bineg[bineg$axis == 1,]
+bipos <- read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/lion_coinfection_networks_files/nodedfbinet_FIVpos.csv")
+biposl <- bipos[bipos$axis == 1,]
 
 breaks <- seq(0, 10, 1)
 # Note: Value divided by maximum value in the network...
@@ -236,7 +235,7 @@ dev.off()
 ###########################################################
 ###########################################################
 par <- read.csv("~/Documents/postdoc_buffology/HB-lion_coinfection_network/lion_coinfection_networks_files/allparnet_com.csv")
-lion<- read.csv("~/Documents/MATLAB/lionparasites.csv")
+lion <- read.csv("~/Documents/MATLAB/lionparasites.csv")
 
 # Make a list of all parasite pairs and their associated community
 data <- data.frame(
@@ -253,7 +252,7 @@ for(i in 1:length(data[,1])){
 # remove duplicates
 #data$wt[data$opar == data$dpar] <- 0
 
-EL=cbind(as.character(data$oname), as.character(data$dname))   # needs to be in matrix form for igraph
+EL = cbind(as.character(data$oname), as.character(data$dname))   # needs to be in matrix form for igraph
 graph=graph.edgelist(EL, directed=FALSE)
 E(graph)$weight <- data$wt
 adjmat=get.adjacency(graph, attr="weight")  # symmetric, weighted, no self loops.
@@ -267,7 +266,6 @@ comcol <- data.frame(counties = par$Name, com = par$Community)
 comcol$coldark= as.character(colmatch$coldark[match(comcol$com, colmatch$com)])
 comcol$col= as.character(colmatch$col[match(comcol$com, colmatch$com)])
 
-	
 # make df1: holds data to set spacing
 df1 <- data.frame(order=c(1:length(unique(data$oname))),
 	region=sort(unique(data$oname)), xmin=rep(0, length(unique(data$oname))), 
